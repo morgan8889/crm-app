@@ -1,9 +1,18 @@
 "use client";
 
-import { Activity, BarChart3, Building2, Handshake, LayoutDashboard, Users } from "lucide-react";
+import {
+  Activity,
+  BarChart3,
+  Building2,
+  Handshake,
+  LayoutDashboard,
+  LogOut,
+  Users,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-
+import { useTransition } from "react";
+import { logoutAction } from "@/lib/actions/auth";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -16,6 +25,13 @@ const navItems = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const [isPending, startTransition] = useTransition();
+
+  function handleLogout() {
+    startTransition(async () => {
+      await logoutAction();
+    });
+  }
 
   return (
     <aside className="flex h-screen w-64 flex-col border-r bg-gray-50">
@@ -44,6 +60,21 @@ export function Sidebar() {
           );
         })}
       </nav>
+      <div className="border-t p-4">
+        <button
+          type="button"
+          onClick={handleLogout}
+          disabled={isPending}
+          className={cn(
+            "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+            "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
+            "disabled:opacity-50 disabled:cursor-not-allowed"
+          )}
+        >
+          <LogOut className="h-5 w-5" />
+          {isPending ? "Signing out…" : "Sign out"}
+        </button>
+      </div>
     </aside>
   );
 }
