@@ -33,7 +33,12 @@ Follow this workflow for every feature implementation:
 - Run `/check` to verify all gates pass
 - Fix any failures
 
-## 6. Commit
+## 6. Code Review
+- Run `/code-review` locally
+- Fix all critical and medium findings
+- Re-run until clean
+
+## 7. Commit
 - `npx biome check --write .` to auto-fix formatting
 - Stage changes: `git add -A`
 - Conventional commit: `git commit -m "feat: <description>"`
