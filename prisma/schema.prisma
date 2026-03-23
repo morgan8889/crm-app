@@ -1,0 +1,112 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+enum DealStage {
+  LEAD
+  QUALIFIED
+  PROPOSAL
+  NEGOTIATION
+  CLOSED_WON
+  CLOSED_LOST
+}
+
+enum ActivityType {
+  CALL
+  EMAIL
+  MEETING
+  NOTE
+}
+
+model User {
+  id           String     @id @default(cuid())
+  email        String     @unique
+  passwordHash String
+  name         String
+  role         Role       @default(USER)
+  activities   Activity[] @relation("CreatedByUser")
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@map("users")
+}
+
+model Company {
+  id        String    @id @default(cuid())
+  name      String
+  domain    String?
+  industry  String?
+  size      Int?
+  address   String?
+  notes     String?
+  contacts  Contact[]
+  deals     Deal[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@map("companies")
+}
+
+model Contact {
+  id          String     @id @default(cuid())
+  firstName   String
+  lastName    String
+  email       String?
+  phone       String?
+  companyId   String?
+  company     Company?   @relation(fields: [companyId], references: [id])
+  notes       String?
+  tags        String[]
+  deals       Deal[]
+  activities  Activity[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@map("contacts")
+}
+
+model Deal {
+  id                String     @id @default(cuid())
+  title             String
+  value             Decimal?   @db.Decimal(15, 2)
+  stage             DealStage  @default(LEAD)
+  contactId         String?
+  contact           Contact?   @relation(fields: [contactId], references: [id])
+  companyId         String?
+  company           Company?   @relation(fields: [companyId], references: [id])
+  expectedCloseDate DateTime?
+  notes             String?
+  activities        Activity[]
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+
+  @@map("deals")
+}
+
+model Activity {
+  id              String       @id @default(cuid())
+  type            ActivityType
+  subject         String
+  description     String?
+  date            DateTime
+  durationMinutes Int?
+  contactId       String?
+  contact         Contact?     @relation(fields: [contactId], references: [id])
+  dealId          String?
+  deal            Deal?        @relation(fields: [dealId], references: [id])
+  createdById     String
+  createdBy       User         @relation("CreatedByUser", fields: [createdById], references: [id])
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@map("activities")
+}
